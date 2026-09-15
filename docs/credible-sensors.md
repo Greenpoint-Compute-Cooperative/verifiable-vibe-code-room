@@ -9,6 +9,8 @@ This is the Track A/B → Track C seam of the Credible Sensors roadmap (C4 #76):
 presents as a **standard room input** (the existing `/api/mic` PCM socket and `/hands/ws` guest
 cursor socket), plus an **attestation sidecar** the wall can display.
 
+![Wall badge: two attested Pixel sources, StrongBox, locked, fresh, per-stream accepted counts, one sealed](credible-sensors-badge.png)
+
 ## What the room checks
 
 For every attested source the room keeps a **byte ledger** per stream: the raw PCM frames it
