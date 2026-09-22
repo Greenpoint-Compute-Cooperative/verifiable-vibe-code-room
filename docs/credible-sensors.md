@@ -35,16 +35,27 @@ other recorders?). A list that was truncated or reordered, or context edited aft
 | **hardware** (green) | `VIBERSYN_ATTEST_VERIFIER_URL` points at `attestable-verifier serve` | Warden validated the certificate chain to Google's hardware attestation roots + revocation list and enforced the policy: StrongBox key, package + APK signer, bootloader locked, verified-boot key is Google's or a published GrapheneOS key, verifier-issued challenge. The facts on the badge are proven. |
 | **leaf-only** (amber, "unverified") | no verifier configured | The key and the facts are read straight from the leaf certificate. Chunk signatures still bind the bytes to that key and the challenge is still checked, but nothing proves the key is in hardware or the OS is genuine. |
 
-Run the verifier (JVM 17) next to the room:
+Run the verifier next to the room. It needs the **attestable-verifier ≥ 1.1.0** release zip
+(v1.0.0 shipped the batch CLI only; `serve` arrived in 1.1.0) and a JVM 17 or newer:
 
 ```bash
-# from the attestable-recorder repo, or the attestable-verifier-*.zip release asset
-bin/attestable-verifier serve --port 8790 \
+# https://github.com/Greenpoint-Compute-Cooperative/attestable-recorder/releases → attestable-verifier-<ver>.zip
+unzip attestable-verifier-1.1.0.zip
+attestable-verifier-1.1.0/bin/attestable-verifier serve --port 8795 \
   --package com.attestable.recorder.room \
-  --signer <release signer sha256>          # printed in the app's release notes
+  --signer <release signer sha256>          # printed in the recorder's release notes
 # then
-VIBERSYN_ATTEST_VERIFIER_URL=http://127.0.0.1:8790 bun run dev
+VIBERSYN_ATTEST_VERIFIER_URL=http://127.0.0.1:8795 bun run dev
 ```
+
+`serve` exposes `GET /health`, `POST /challenge` and `POST /attest` on 127.0.0.1 (pass
+`--bind 0.0.0.0` only when the room server is on another machine). Port 8795 avoids the room's
+own HTTPS guest-hands listener, which defaults to a port next to the main one.
+
+**Package names.** The recorder ships two flavors from one codebase, and `--package` must name
+the one the phone is running: `com.attestable.recorder.room` for room mode (this document),
+`com.attestable.recorder` for the offline recorder (the recorder's own release notes). Both are
+signed with the same release certificate, so `--signer` is the same fingerprint for both.
 
 ## The wire flow
 
